@@ -4,6 +4,7 @@
 
 #define NIBBLE1(b) (b >> 4)
 #define NIBBLE2(b) (b & 0xf)
+#define OPS_PS 20
 
 static uint_fast8_t opcode;
 uint8_t memory[4096];
@@ -23,6 +24,8 @@ uint16_t sp;
 uint_fast8_t key[16];
 uint_fast8_t halt;
 uint8_t waitForKey;
+
+int Counter;
 
 void initialize();
 size_t loadGame(char* fileName);

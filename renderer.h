@@ -7,7 +7,7 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 
 void createWindow();
-void renderScreen ();
+Uint32 renderScreen (Uint32 interval, void *gfx);
 void destroy();
 void procIO ();
 

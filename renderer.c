@@ -2,9 +2,10 @@
 #include<stdio.h>
 #include<SDL2/SDL.h>
 #include "renderer.h"
+#include "chip8.h"
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 640
+#define HEIGHT 320
 
 void createWindow () {
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
@@ -43,25 +44,32 @@ void procIO () {
             case SDLK_RIGHT:
                 break;
             case SDLK_ESCAPE:
+                halt = 2;
                 break; 
             default:
                 break;
             }
         }
     }
-    SDL_RenderClear(renderer);
-    SDL_Rect rect = {50, 50, 200, 200};
-    SDL_RenderFillRect(renderer, &rect);
-    SDL_Delay(1000/60);
 }
 
-void renderScreen (const uint8_t *gfx) {
+Uint32 renderScreen (Uint32 interval, void *param) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
     for (int r = 0; r < 32; r++) {
         for (int c = 0; c < 64; c++) {
-            printf("%c", gfx[r * 64 + c] ? 'O' : ' ');
+            // printf("%c", gfx[r * 64 + c] ? 'O' : ' ');
+            if (gfx[r * 64 + c]) {
+                SDL_Rect rect = {c * 10, r * 10, 10, 10};
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                SDL_RenderFillRect(renderer, &rect);
+            }
         }
-        printf("\n");
+        // printf("\n");
     }
+    SDL_RenderPresent(renderer);
+    printf("render\n");
+    return interval;
 }
 
 void destroy() {

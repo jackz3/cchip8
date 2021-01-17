@@ -46,6 +46,7 @@ void initialize() {
  
   // Reset timers
   halt = 0;
+  Counter = OPS_PS;
 }
 
 size_t loadGameFromFile (FILE *file) {
@@ -94,6 +95,7 @@ void emulateCycle () {
         uint16_t target = (NIBBLE2(byte1) << 8) | byte2;
         if (target == (pc - 2)) {
           halt = 1;
+          Counter = 0;
           break;
         }
         pc = target;
@@ -187,7 +189,7 @@ void emulateCycle () {
       I = (NIBBLE2(byte1) << 8) | byte2;
       break;
     case 0xc:
-	    V[NIBBLE2(byte1)] = random() & byte2;
+	    V[NIBBLE2(byte1)] = rand() & byte2;
       break;
     case 0xd:
       {
@@ -251,6 +253,8 @@ void emulateCycle () {
           //     //do not advance the PC
           //     return;
           // }
+          pc -= 2;
+          Counter = 0;
         break;
       }
       case 0x1e:
@@ -303,5 +307,9 @@ void emulateCycle () {
     if(sound_timer == 1)
       printf("BEEP!\n");
     --sound_timer;
-  }  
+  }
+  // if(--Counter <= 0) {
+  //   Counter += OPS_PS;
+  //   // if(ExitRequired) break;
+  // }
 }
