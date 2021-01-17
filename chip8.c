@@ -127,8 +127,36 @@ void emulateCycle () {
     {
       uint_fast8_t regX = NIBBLE2(byte1);
       uint_fast8_t regY = NIBBLE1(byte2);
-      switch (NIBBLE2(byte2))
-      {
+      switch (NIBBLE2(byte2)) {
+      case 0:
+        V[regX] = V[regY];
+        break;
+      case 1:
+        V[regX] |= V[regY];
+        break;
+      case 2:
+        V[regX] &= V[regY];
+        break;
+      case 3:
+       V[regX] ^= V[regY];
+       break;
+      case 4: 
+			{
+				uint16_t sum = V[regX] + V[regY];
+				if (sum & 0xff00)
+					V[0xf] = 1;
+				else
+					V[0xf] = 0;
+        V[regX] = sum; // &0xff;
+			}
+        break;
+      case 5: 
+        {
+          uint_fast8_t borrow = (V[regX] > V[regY]);
+          V[regX] -= V[regY];
+          V[0xf] = borrow;
+        }
+		  	break;
       case 6:					//SHR
 			{
         // (Optional, or configurable) Set VX to the value of VY
@@ -230,6 +258,18 @@ void emulateCycle () {
         break;
       case 0x29:
         I = V[reg] * 5;
+        break;
+      case 0x33:
+        {
+            uint8_t ones, tens, hundreds;
+            uint8_t value= V[reg];
+            ones = value % 10;
+            tens = (value / 10) % 10;
+            hundreds = value / 100;
+            memory[I] = hundreds;
+            memory[I + 1] = tens;
+            memory[I + 2] = ones;
+        }
         break;
       case 0x55:
       {

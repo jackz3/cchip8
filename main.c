@@ -50,7 +50,8 @@ int main (int argc, char**argv) {
     // size_t len = loadGame("Chip8 Picture.ch8");
     // size_t len = loadGame("Maze.ch8");
     // size_t len = loadGame("Keypad Test [Hap, 2006].ch8");
-    size_t len = loadGame("test_opcode.ch8");
+    // size_t len = loadGame("test_opcode.ch8");
+    size_t len = loadGame("./roms/random_number_test.ch8");
     printf("rom size:%ld\n", len);
     int i = 0;
     while (1) {

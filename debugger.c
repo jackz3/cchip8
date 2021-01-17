@@ -26,7 +26,7 @@ void printReg () {
 }
 
 void printUnknown (uint_fast8_t byte1, uint_fast8_t byte2) {
-  printf ("Unknown opcode: 0x%02X %02X", byte1, byte2);
+  printf ("Unknown opcode: 0x%02x %02x ", byte1, byte2);
   exit(1);
 }
 
@@ -81,6 +81,20 @@ void disasm(const uint8_t *mem, int pc) {
       uint_fast8_t regX = NIBBLE2(byte1);
       uint_fast8_t regY = NIBBLE1(byte2);
       switch (NIBBLE2(byte2)) {
+      case 0:
+        printf("V%01X = V%01X", regX, regY);
+      case 1:
+        printf("V%01X |= V%01X", regX, regY);
+      case 2:
+        printf("V%01X &= V%01X", regX, regY);
+      case 3:
+        printf("V%01X ^= V%01X", regX, regY);
+      case 4: 
+        printf("V%01X += V%01X", regX, regY);
+        break;
+      case 5: 
+        printf("V%01X -= V%01X", regX, regY);
+		  	break;
       case 6:
         printf("V%01X >>= 1", regX);
 			  break; 
@@ -117,6 +131,9 @@ void disasm(const uint8_t *mem, int pc) {
         break;
       case 0x29:
         printf("I = sprite_addr[V%01X]", reg);
+        break;
+      case 0x33:
+        printf("I = BCD(V%01X)", reg);
         break;
       case 0x55:
         printf("Reg_dump(V%01X, &I)", reg);
