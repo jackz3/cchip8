@@ -4,7 +4,7 @@
 
 #define NIBBLE1(b) (b >> 4)
 #define NIBBLE2(b) (b & 0xf)
-#define OPS_PS 20
+#define OPS_PS 500
 
 static uint_fast8_t opcode;
 uint8_t memory[4096];
@@ -21,7 +21,8 @@ unsigned char sound_timer;
 uint16_t stack[16];
 uint16_t sp;
 // the Chip 8 has a HEX based keypad (0x0-0xF)
-uint_fast8_t key[16];
+uint8_t keypad[16];
+
 uint_fast8_t halt;
 uint8_t waitForKey;
 

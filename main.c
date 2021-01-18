@@ -49,43 +49,44 @@ int main (int argc, char**argv) {
     // size_t len = loadGame("./roms/IBM Logo.ch8");
     // size_t len = loadGame("Fishie.ch8");
     // size_t len = loadGame("Chip8 Picture.ch8");
-    size_t len = loadGame("./roms/Maze.ch8");
-    // size_t len = loadGame("./roms/Keypad Test [Hap, 2006].ch8");
+    // size_t len = loadGame("./roms/Maze.ch8");
+    size_t len = loadGame("./roms/Keypad Test [Hap, 2006].ch8");
     // size_t len = loadGame("./roms/random_number_test.ch8");
     // size_t len = loadGame("test_opcode.ch8");
-    printf("rom size:%ld\n", len);
-    int i = 0;
+    // printf("rom size:%ld\n", len);
+    const int InterruptPeriod = OPS_PS / 10;
+    Counter = InterruptPeriod;
     SDL_TimerID my_timer_id = SDL_AddTimer(1000 / 60, renderScreen, gfx);
     unsigned int lastTime = SDL_GetTicks(), currentTime;
     while (1) {
         procIO();
-        if (--Counter <= 0) {
+        if (Counter <= 0) {
             if (halt == 2) {
                 break;
             }
             if (halt) {
                 continue;
             }
-            currentTime = SDL_GetTicks();
-            printf("last %d, current %d", lastTime, currentTime);
-            unsigned int diff = 1000 - (currentTime - lastTime);
-            if (diff > 0) {
-                printf("delay\n");
-                SDL_Delay(diff);
+            if (waitForKey == 1) {
+                // printf("wait for key press\n");
+                // continue;
+            // }
+            // if (waitForKey == 2) {
+            //     lastTime = SDL_GetTicks();
+            //     waitForKey = 0;
+            } else {
+                currentTime = SDL_GetTicks();
+                unsigned int diff = 100 - (currentTime - lastTime);
+                if (diff > 0) {
+                    SDL_Delay(diff);
+                }
+                lastTime = currentTime + diff;
             }
-            lastTime = currentTime + diff;
-            Counter = OPS_PS;
+            Counter = InterruptPeriod;
         }
         // disasm(memory, pc);
         emulateCycle();
-        if (waitForKey) {
-            printf("wait for key press\n");
-            continue;
-        }
-        // if (halt) {
-        //     renderScreen(0, gfx);
-        //     break;
-        // }
+        Counter--;
     }
     destroy();
     return 0;

@@ -119,12 +119,28 @@ void disasm(const uint8_t *mem, int pc) {
     case 0xd:
       printf("Draw V%01X,V%01X,#%01x", NIBBLE2(byte1), NIBBLE1(byte2), NIBBLE2(byte2));
       break;
+    case 0xe:
+    {
+      uint_fast8_t reg = NIBBLE2(byte1);
+      switch (byte2)
+      {
+      case 0x9e:
+        printf("If key() != V%01X Skip", reg);
+        break;
+      case 0xa1:
+        printf("If key() == V%01X Skip", reg);
+        break;
+      default:
+        printUnknown(byte1, byte2);
+        break;
+      }
+    }
     case 0xf:
     {
       uint_fast8_t reg = NIBBLE2(byte1);
       switch (byte2) {
       case 0x0a:
-        printf("V%01X = get_key()", reg);
+        printf("V%01X = wait_key()", reg);
         break;
       case 0x1e:
         printf("I += V%01X", reg); 

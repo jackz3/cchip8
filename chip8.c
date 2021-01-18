@@ -46,7 +46,6 @@ void initialize() {
  
   // Reset timers
   halt = 0;
-  Counter = OPS_PS;
 }
 
 size_t loadGameFromFile (FILE *file) {
@@ -217,46 +216,50 @@ void emulateCycle () {
         }
       }
       break;
-    case 0xf:
+    case 0xe:
     {
       uint_fast8_t reg = NIBBLE2(byte1);
       switch (byte2)
       {
-        case 0x0a:
-        {
-          waitForKey = 1;
-          // if (state->waiting_for_key == 0)
-          // {
-          //     //start the key_wait_cycle
-          //     memcpy(&state->save_key_state, &state->key_state, 16);
-          //     state->waiting_for_key = 1;
-          //     //do not advance PC
-          //     return;
-          // }
-          // else
-          // {
-          //     int i;
-          //     //look for a change in key_state from 0 to 1
-          //     for (i = 0; i < 16; i++)
-          //     {
-          //         if ((state->save_key_state[i] == 0) && (state->key_state[i] == 1))
-          //         {
-          //             state->waiting_for_key = 0;
-          //             state->V[reg] = i;
-          //             state->PC += 2;
-          //             return;
-          //         }
-          //         //by copying the key state, this allows detection of a key that 
-          //         // started pressed, then got released, then was pressed again
-          //         state->save_key_state[i] = state->key_state[i];
-          //     }
-          //     //do not advance the PC
-          //     return;
-          // }
-          pc -= 2;
-          Counter = 0;
+      case 0x9e:
+        if(keypad[V[reg]] != 0)
+          pc += 2;
+        break;
+      case 0xa1:
+        if (keypad[V[reg]] == 0)
+          pc += 2;
+        break;
+      default:
+        printUnknown(byte1, byte2);
         break;
       }
+    }
+    case 0xf:
+    {
+      uint_fast8_t reg = NIBBLE2(byte1);
+      switch (byte2) {
+        case 0x0a:
+        {
+          if (waitForKey == 0) {
+            waitForKey = 1;
+            pc -= 2;
+            Counter = 0;
+            memset(keypad, 0, 16);
+          } else {
+            printf("check keypad");
+            for (int i = 0; i < 16; i++)
+            {
+              if (keypad[i] == 1)
+              {
+                waitForKey = 0;
+                V[reg] = i;
+                break;
+              }
+            }
+            pc -= 2;
+          }
+        }
+        break;
       case 0x1e:
         I += V[reg];
         break;
@@ -297,10 +300,6 @@ void emulateCycle () {
     default:
       printUnknown(byte1, byte2);
   }  
- 
-  // Update timers
-  if(delay_timer > 0)
-    --delay_timer;
  
   if(sound_timer > 0)
   {
