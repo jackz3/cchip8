@@ -27,7 +27,7 @@ void printReg () {
 
 void printUnknown (uint_fast8_t byte1, uint_fast8_t byte2) {
   printf ("Unknown opcode: 0x%02x %02x ", byte1, byte2);
-  exit(1);
+  // exit(1);
 }
 
 void disasm(const uint8_t *mem, int pc) {
@@ -98,6 +98,9 @@ void disasm(const uint8_t *mem, int pc) {
       case 6:
         printf("V%01X >>= 1", regX);
 			  break; 
+      case 7:
+        printf("V%01X = V%01X - V%01X", regX, regY, regX);
+		  	break;
       case 0xe:
         printf("V%01X <<= 1", regX);
         break;
@@ -112,6 +115,9 @@ void disasm(const uint8_t *mem, int pc) {
       break;
     case 0xA: // ANNN: Sets I to the address NNN
       printf("I = $%02x%02x",  NIBBLE2(byte1), byte2);    
+      break;
+    case 0xb:
+      printf("PC=V0 + $%02x%02x", NIBBLE2(byte1), byte2);
       break;
     case 0xc:
       printf("V%01X = RND & #%02x", NIBBLE2(byte1), byte2);
@@ -135,12 +141,22 @@ void disasm(const uint8_t *mem, int pc) {
         break;
       }
     }
+      break;
     case 0xf:
     {
       uint_fast8_t reg = NIBBLE2(byte1);
       switch (byte2) {
+      case 0x07:
+        printf("V%01X = get_delay()", reg);
+        break;
       case 0x0a:
         printf("V%01X = wait_key()", reg);
+        break;
+      case 0x15:
+        printf("delay_timer(V%01X)", reg);
+        break;
+      case 0x18:
+        printf("sound_timer(V%01X)", reg);
         break;
       case 0x1e:
         printf("I += V%01X", reg); 

@@ -50,9 +50,14 @@ int main (int argc, char**argv) {
     // size_t len = loadGame("Fishie.ch8");
     // size_t len = loadGame("Chip8 Picture.ch8");
     // size_t len = loadGame("./roms/Maze.ch8");
-    size_t len = loadGame("./roms/Keypad Test [Hap, 2006].ch8");
+    // size_t len = loadGame("./roms/test_opcode.ch8");
     // size_t len = loadGame("./roms/random_number_test.ch8");
-    // size_t len = loadGame("test_opcode.ch8");
+    // size_t len = loadGame("./roms/Keypad Test [Hap, 2006].ch8");
+    // size_t len = loadGame("./roms/delay_timer_test.ch8");
+    size_t len = loadGame("./roms/snake.ch8");
+    // size_t len = loadGame("./roms/rockto.ch8");
+    // size_t len = loadGame("./roms/chipwar.ch8");
+    // size_t len = loadGame("./roms/slipperyslope.ch8");
     // printf("rom size:%ld\n", len);
     const int InterruptPeriod = OPS_PS / 10;
     Counter = InterruptPeriod;
@@ -69,12 +74,14 @@ int main (int argc, char**argv) {
             }
             if (waitForKey == 1) {
                 // printf("wait for key press\n");
-                // continue;
-            // }
-            // if (waitForKey == 2) {
-            //     lastTime = SDL_GetTicks();
-            //     waitForKey = 0;
+                continue;
+            }
+            if (waitForKey == 2) {
+                printf("wait 2\n");
+                lastTime = SDL_GetTicks();
+                // waitForKey = 0;
             } else {
+                printf("wait 0\n");
                 currentTime = SDL_GetTicks();
                 unsigned int diff = 100 - (currentTime - lastTime);
                 if (diff > 0) {
@@ -84,7 +91,7 @@ int main (int argc, char**argv) {
             }
             Counter = InterruptPeriod;
         }
-        // disasm(memory, pc);
+        disasm(memory, pc);
         emulateCycle();
         Counter--;
     }

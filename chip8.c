@@ -7,8 +7,8 @@
 // #define NIBBLE2(b) (b & 0xf)
 
 static void printUnknown (uint_fast8_t byte1, uint_fast8_t byte2) {
-  printf ("Unknown opcode: 0x%02X %02X", byte1, byte2);
-  exit(1);
+  printf ("Unknown opcode: 0x%02x %02x", byte1, byte2);
+  // exit(1);
 }
 
 void initialize() {
@@ -166,6 +166,13 @@ void emulateCycle () {
 				V[0xf] = vf;
 			}
 			  break; 
+      case 7:
+        {
+          uint_fast8_t borrow = (V[regY] > V[regX]);
+          V[regX] = V[regY] - V[regX];
+          V[0xf] = borrow;
+        }
+        break;
       case 0xe:
       {
         // uint8_t vf = (0x80 == (V[regX] & 0x80));
@@ -186,6 +193,9 @@ void emulateCycle () {
       break;
     case 0xA: // ANNN: Sets I to the address NNN
       I = (NIBBLE2(byte1) << 8) | byte2;
+      break;
+    case 0xb:
+      pc = ((uint16_t)V[0] + ((NIBBLE2(byte1) <<8) | byte2));
       break;
     case 0xc:
 	    V[NIBBLE2(byte1)] = rand() & byte2;
@@ -234,19 +244,24 @@ void emulateCycle () {
         break;
       }
     }
+      break;
     case 0xf:
     {
       uint_fast8_t reg = NIBBLE2(byte1);
       switch (byte2) {
+        case 0x07:
+          V[reg] = delay_timer;
+          break;
         case 0x0a:
         {
+          printf("cpu wait %d\n", waitForKey);
           if (waitForKey == 0) {
             waitForKey = 1;
             pc -= 2;
             Counter = 0;
             memset(keypad, 0, 16);
           } else {
-            printf("check keypad");
+            printf("check keypad %d\n", keypad[2]);
             for (int i = 0; i < 16; i++)
             {
               if (keypad[i] == 1)
@@ -256,9 +271,17 @@ void emulateCycle () {
                 break;
               }
             }
-            pc -= 2;
+            if (waitForKey != 0) {
+              pc -= 2;
+            }
           }
         }
+        break;
+      case 0x15:
+        delay_timer = V[reg];
+        break;
+      case 0x18:
+        sound_timer = V[reg];
         break;
       case 0x1e:
         I += V[reg];
@@ -301,12 +324,6 @@ void emulateCycle () {
       printUnknown(byte1, byte2);
   }  
  
-  if(sound_timer > 0)
-  {
-    if(sound_timer == 1)
-      printf("BEEP!\n");
-    --sound_timer;
-  }
   // if(--Counter <= 0) {
   //   Counter += OPS_PS;
   //   // if(ExitRequired) break;

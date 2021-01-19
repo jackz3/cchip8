@@ -24,6 +24,9 @@ void procIO () {
         }
         if (event.type == SDL_KEYDOWN){
             switch (event.key.keysym.sym) {
+            case SDLK_0:
+                keypad[0] = 1;
+                break;
             case SDLK_1:
                 keypad[1] = 1;
                 break;
@@ -77,13 +80,18 @@ void procIO () {
             case SDLK_ESCAPE:
                 halt = 2;
                 break; 
+            default:
+                return;
             }
-            // if (waitForKey == 1) {
-            //     waitForKey = 2;
-            // }
+            if (waitForKey == 1) {
+                waitForKey = 2;
+            }
         }
         if (event.type == SDL_KEYUP) {
             switch (event.key.keysym.sym) {
+            case SDLK_0:
+                keypad[0] = 0;
+                break;
             case SDLK_1:
                 keypad[1] = 0;
                 break;
@@ -154,6 +162,14 @@ Uint32 renderScreen (Uint32 interval, void *param) {
     }
     SDL_RenderPresent(renderer);
     // printf("render\n");
+    if (delay_timer > 0) {
+        delay_timer--;
+    }
+    if(sound_timer > 0) {
+        if(sound_timer == 1)
+            printf("BEEP!\n");
+        --sound_timer;
+    }
     return interval;
 }
 
