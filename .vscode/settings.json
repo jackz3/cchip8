@@ -1,5 +1,8 @@
 {
   "files.associations": {
-    "cstdint": "cpp"
+    "cstdint": "cpp",
+    "windows.h": "c",
+    "libretro.h": "c",
+    "chip8.h": "c"
   }
 }

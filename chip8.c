@@ -3,8 +3,21 @@
 #include<string.h>
 #include "chip8.h"
 
-// #define NIBBLE1(b) (b >> 4)
-// #define NIBBLE2(b) (b & 0xf)
+uint8_t memory[4096];
+uint8_t V[16];
+uint16_t I;
+uint16_t pc;
+uint8_t gfx[64 * 32];
+uint8_t delay_timer;
+uint8_t sound_timer;
+uint16_t stack[16];
+uint16_t sp;
+uint8_t keypad[16];
+uint_fast8_t halt;
+uint8_t waitForKey;
+int Counter;
+
+uint_fast8_t opcode;
 
 static void printUnknown (uint_fast8_t byte1, uint_fast8_t byte2) {
   printf ("Unknown opcode: 0x%02x %02x", byte1, byte2);
@@ -58,7 +71,7 @@ size_t loadGameFromFile (FILE *file) {
     return fread(buffer, 1, fsize, file);    
 }
 
-size_t loadGame(char* fileName) {
+size_t loadGame(const char* fileName) {
   FILE *f= fopen(fileName, "rb");    
   if (f==NULL)    
   {    

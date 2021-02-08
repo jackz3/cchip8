@@ -7,6 +7,9 @@
 #define WIDTH 640
 #define HEIGHT 320
 
+static SDL_Window *window;
+static SDL_Renderer *renderer;
+
 void createWindow () {
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
         printf("sdl init error: %s\n", SDL_GetError());

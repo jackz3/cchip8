@@ -16,7 +16,7 @@ void clean (SDL_Window *window, SDL_Renderer * render) {
     exit(1);
 }
 
-int main () {
+int main (int argc, char** argv) {
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
         printf("error init sdl %s\n", SDL_GetError());
     }
@@ -190,4 +190,5 @@ int main () {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    return 0;
 }
