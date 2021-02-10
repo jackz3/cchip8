@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "chip8.h"
+#include "debugger.h"
 
 uint8_t memory[4096];
 uint8_t V[16];
@@ -15,7 +16,7 @@ uint16_t sp;
 uint8_t keypad[16];
 uint_fast8_t halt;
 uint8_t waitForKey;
-int Counter;
+// int Counter;
 
 uint_fast8_t opcode;
 
@@ -81,7 +82,7 @@ size_t loadGame(const char* fileName) {
   return loadGameFromFile(f);
 }
 
-void emulateCycle () {
+void runOneCycle(uint8_t* cycles) {
   // Fetch opcode
   // opcode = memory[pc] << 8 | memory[pc + 1];
   uint_fast8_t byte1 = memory[pc++];
@@ -107,7 +108,7 @@ void emulateCycle () {
         uint16_t target = (NIBBLE2(byte1) << 8) | byte2;
         if (target == (pc - 2)) {
           halt = 1;
-          Counter = 0;
+          *cycles = 0;
           break;
         }
         pc = target;
@@ -271,10 +272,9 @@ void emulateCycle () {
           if (waitForKey == 0) {
             waitForKey = 1;
             pc -= 2;
-            Counter = 0;
+            *cycles = 0;
             memset(keypad, 0, 16);
           } else {
-            printf("check keypad %d\n", keypad[2]);
             for (int i = 0; i < 16; i++)
             {
               if (keypad[i] == 1)
@@ -336,9 +336,11 @@ void emulateCycle () {
     default:
       printUnknown(byte1, byte2);
   }  
- 
-  // if(--Counter <= 0) {
-  //   Counter += OPS_PS;
-  //   // if(ExitRequired) break;
-  // }
+}
+
+void emulateCycle (uint8_t cycles) {
+  while (cycles--) {
+    // disasm(memory, pc);
+    runOneCycle(&cycles);
+  }
 }

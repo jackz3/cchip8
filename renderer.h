@@ -4,8 +4,8 @@
 #include<SDL2/SDL.h>
 
 void createWindow();
-Uint32 renderScreen(Uint32 interval, void *param);
+void renderScreen();
 void destroy();
-void procIO ();
+void procIO (int* running);
 
 #endif

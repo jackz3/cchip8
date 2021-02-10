@@ -11,6 +11,7 @@
 #endif
 #include "libretro.h"
 #include "chip8.h"
+#include<SDL2/SDL.h>
 
 #define VIDEO_WIDTH 64
 #define VIDEO_HEIGHT 32
@@ -25,6 +26,8 @@ static float last_aspect;
 static float last_sample_rate;
 char retro_base_directory[4096];
 char retro_game_path[4096];
+const uint8_t cycles = OPS_PS / 60;
+uint16_t g_frame[VIDEO_WIDTH * VIDEO_HEIGHT];
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -96,6 +99,9 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    last_sample_rate            = sampling_rate;
    info->timing.fps            = VIDEO_REFRESH_RATE;
    // info->timing.sample_rate    = VIDEO_REFRESH_RATE * AUDIO_SEGMENT_LENGTH;
+   
+   int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
+   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
 
 static struct retro_rumble_interface rumble;
@@ -158,12 +164,6 @@ void retro_reset(void)
    y_coord = 0;
 }
 
-static void update_input(void)
-{
-
-}
-
-
 static void check_variables(void)
 {
 
@@ -185,16 +185,72 @@ static void audio_set_state(bool enable)
    (void)enable;
 }
 
+void pull_input() {
+   input_poll_cb();
+   // memset(keypad, 0, 16);
+   printf("status: %d, %d\n", keypad[5], keypad[7]);
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_1)) {
+      keypad[1] = 1;
+      printf("key 1 pressed");
+   } else {
+      keypad[1] = 0;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP)) {
+      printf("key 5 pressed !!!!!!");
+      keypad[5] = 1;
+   } else {
+      keypad[5] = 0;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT)) {
+      printf("key 7 pressed !!!!!!");
+      keypad[7] = 1;
+   } else {
+      keypad[7] = 0;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN)) {
+      keypad[8] = 1;
+   } else {
+      keypad[8] = 0;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT)) {
+      keypad[9] = 1;
+   } else {
+      keypad[9] = 0;
+   }
+   printf("status end: %d, %d\n", keypad[5], keypad[7]);
+}
+
+Uint32 lastTime = 0, currentTime;
 void retro_run(void)
 {
    unsigned i;
-   update_input();
+   pull_input();
 
+   if (halt) {
+      printf("halt\n");
+      return;
+   }
+   emulateCycle(cycles);
+   memset(g_frame, 0, VIDEO_WIDTH * VIDEO_HEIGHT);
+   for (int i =0; i < VIDEO_WIDTH * VIDEO_HEIGHT; i++) {
+      if (gfx[i]) {
+         g_frame[i] = 0xff << 5;
+      }
+   }
 
+   currentTime = SDL_GetTicks();
+   int delta = 17 - (currentTime - lastTime);
+   if (delta> 0) {
+      SDL_Delay(delta);
+   }
+
+   video_cb(g_frame, 64, 32, 64 * 2);
 
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
+   
+   lastTime = currentTime + delta;
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -204,6 +260,22 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_0, "0"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_1, "1"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_2, "2"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_3, "3"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_4, "4"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_5, "5"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_6, "6"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_7, "7"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_8, "8"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_9, "9"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_a, "a"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_b, "b"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_c, "c"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_d, "d"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_e, "e"},
+      { 0, RETRO_DEVICE_KEYBOARD, 0, RETROK_f, "f"},
       { 0 },
    };
 
@@ -217,8 +289,10 @@ bool retro_load_game(const struct retro_game_info *info)
    }
 
    snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
+   initialize();
+   loadGame(info->path);
    struct retro_audio_callback audio_cb = { audio_callback, audio_set_state };
-   use_audio_cb = environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio_cb);
+   // use_audio_cb = environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio_cb);
 
    // check_variables();
 

@@ -19,11 +19,12 @@ void createWindow () {
     }
 }
 
-void procIO () {
+void procIO (int* running) {
     SDL_Event event;
     while (SDL_PollEvent(&event)){
         if (event.type == SDL_QUIT){
-            halt = 2;
+            // halt = 2;
+            *running = 0;
         }
         if (event.type == SDL_KEYDOWN){
             switch (event.key.keysym.sym) {
@@ -34,25 +35,23 @@ void procIO () {
                 keypad[1] = 1;
                 break;
             case SDLK_2:
-            case SDLK_UP:
-                printf("key2\n");
                 keypad[2] = 1;
                 break;
             case SDLK_3:
                 keypad[3] = 1;
                 break;
             case SDLK_4:
-            case SDLK_LEFT:
                 keypad[4] = 1;
                 break;
             case SDLK_5:
+            case SDLK_UP:
                 keypad[5] = 1;
                 break;
             case SDLK_6:
-            case SDLK_RIGHT:
                 keypad[6] = 1;
                 break;
             case SDLK_7:
+            case SDLK_LEFT:
                 keypad[7] = 1;
                 break;
             case SDLK_8:
@@ -60,6 +59,7 @@ void procIO () {
                 keypad[8] = 1;
                 break;
             case SDLK_9:
+            case SDLK_RIGHT:
                 keypad[9] = 1;
                 break;
             case SDLK_a:
@@ -81,14 +81,15 @@ void procIO () {
                 keypad[0xf] = 1;
                 break;
             case SDLK_ESCAPE:
-                halt = 2;
+                // halt = 2;
+                *running = 0;
                 break; 
             default:
                 return;
             }
-            if (waitForKey == 1) {
-                waitForKey = 2;
-            }
+            // if (waitForKey == 1) {
+            //     waitForKey = 2;
+            // }
         }
         if (event.type == SDL_KEYUP) {
             switch (event.key.keysym.sym) {
@@ -99,24 +100,23 @@ void procIO () {
                 keypad[1] = 0;
                 break;
             case SDLK_2:
-            case SDLK_UP:
                 keypad[2] = 0;
                 break;
             case SDLK_3:
                 keypad[3] = 0;
                 break;
             case SDLK_4:
-            case SDLK_LEFT:
                 keypad[4] = 0;
                 break;
             case SDLK_5:
+            case SDLK_UP:
                 keypad[5] = 0;
                 break;
             case SDLK_6:
-            case SDLK_RIGHT:
                 keypad[6] = 0;
                 break;
             case SDLK_7:
+            case SDLK_LEFT:
                 keypad[7] = 0;
                 break;
             case SDLK_8:
@@ -124,6 +124,7 @@ void procIO () {
                 keypad[8] = 0;
                 break;
             case SDLK_9:
+            case SDLK_RIGHT:
                 keypad[9] = 0;
                 break;
             case SDLK_a:
@@ -149,7 +150,8 @@ void procIO () {
     }
 }
 
-Uint32 renderScreen (Uint32 interval, void *param) {
+// Uint32 renderScreen (Uint32 interval, void *param) {
+void renderScreen () {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     for (int r = 0; r < 32; r++) {
@@ -173,7 +175,6 @@ Uint32 renderScreen (Uint32 interval, void *param) {
             printf("BEEP!\n");
         --sound_timer;
     }
-    return interval;
 }
 
 void destroy() {

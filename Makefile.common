@@ -1,2 +1,2 @@
-SOURCES_C   := 
+SOURCES_C   := $(CORE_DIR)/chip8.c $(CORE_DIR)/debugger.c
 SOURCES_CXX := $(CORE_DIR)/libretro.c

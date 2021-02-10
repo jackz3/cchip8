@@ -4,7 +4,7 @@
 
 #define NIBBLE1(b) (b >> 4)
 #define NIBBLE2(b) (b & 0xf)
-#define OPS_PS 500
+#define OPS_PS 600
 
 extern uint8_t memory[4096];
 extern uint8_t V[16];
@@ -29,6 +29,6 @@ extern int Counter;
 
 void initialize();
 size_t loadGame(const char* fileName);
-void emulateCycle();
+void emulateCycle(uint8_t cycles);
 
 #endif

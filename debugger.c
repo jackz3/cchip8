@@ -30,7 +30,7 @@ void printUnknown (uint_fast8_t byte1, uint_fast8_t byte2) {
   // exit(1);
 }
 
-void disasm(const uint8_t *mem, int pc) {
+void disasm(const uint8_t *mem, const int pc) {
   printMem();
   uint_fast8_t byte1 = memory[pc];
   uint_fast8_t byte2 = memory[pc + 1];
